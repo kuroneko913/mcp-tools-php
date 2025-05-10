@@ -1,0 +1,26 @@
+{
+    "tools": [
+      {
+        "name": "get_weather",
+        "description": "都市の天気を取得します",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "location": { "type": "string", "description": "都市名 (例: Tokyo,JP)" }
+          },
+          "required": ["location"]
+        }
+      },
+      {
+        "name": "now",
+        "description": "現在の時刻を取得します",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "timezone": { "type": "string", "description": "タイムゾーン (例: Asia/Tokyo)" }
+          },
+          "required": ["timezone"]
+        }
+      }
+    ]
+}

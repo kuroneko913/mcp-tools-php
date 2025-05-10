@@ -1,0 +1,18 @@
+{
+    "name": "kuroneko/mcp-tools-php",
+    "description": "ModelContextProtocol for Practice",
+    "require": {
+        "guzzlehttp/psr7": "^2.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "kuroneko913",
+            "email": "myblackcat7112+github@gmail.com"
+        }
+    ]
+}
