@@ -2,7 +2,7 @@
 
 ## 概要
 
-このサーバは、tools.jsonで定義されたツール（get_weather, now）をJSON-RPC 2.0形式でSTDIN/STDOUT経由で処理するPHP製MCPサーバです。
+このサーバは、tools.jsonで定義されたツール（weather, clock）をJSON-RPC 2.0形式でSTDIN/STDOUT経由で処理するPHP製MCPサーバです。
 
 ## 実行例
 
@@ -25,12 +25,12 @@ echo '{"jsonrpc": "2.0", "id": 2, "method": "tools/list"}' | make run
 ### 3. ツール実行（execute）
 ```sh
 # 天気取得ツールの呼び出し
-echo '{"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "get_weather", "arguments": {"location": "Tokyo,JP"}}}' | make run
+echo '{"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "weather", "arguments": {"location": "Tokyo,JP"}}}' | make run
 # レスポンス例
 # {"jsonrpc":"2.0","id":3,"result":{"content":[{"type":"text","text":"{\"location\":\"Tokyo,JP\",\"weather\":\"\\u6674\\u308c\",\"temperature\":\"25\",\"unit\":\"C\"}"}]}}
 
 # 現在時刻ツールの呼び出し
-echo '{"jsonrpc": "2.0", "id": 4, "method": "tools/call", "params": {"name": "now", "arguments":{"timezone": "Asia/Tokyo"}}}' | make run
+echo '{"jsonrpc": "2.0", "id": 4, "method": "tools/call", "params": {"name": "clock", "arguments":{"timezone": "Asia/Tokyo"}}}' | make run
 # レスポンス例
 # {"jsonrpc":"2.0","id":4,"result":{"content":[{"type":"text","text":"{\"timezone\":\"Asia\\\/Tokyo\",\"now\":\"2025-05-11 00:08:43\"}"}]}}
 ```

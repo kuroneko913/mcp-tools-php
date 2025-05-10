@@ -1,7 +1,7 @@
 {
     "tools": [
       {
-        "name": "get_weather",
+        "name": "weather",
         "description": "都市の天気を取得します",
         "inputSchema": {
           "type": "object",
@@ -12,7 +12,7 @@
         }
       },
       {
-        "name": "now",
+        "name": "clock",
         "description": "現在の時刻を取得します",
         "inputSchema": {
           "type": "object",
