@@ -2,7 +2,7 @@
     "name": "kuroneko/mcp-tools-php",
     "description": "ModelContextProtocol for Practice",
     "require": {
-        "guzzlehttp/psr7": "^2.7"
+        "guzzlehttp/guzzle": "^7.5"
     },
     "autoload": {
         "psr-4": {
