@@ -14,6 +14,19 @@ JSON-RPC 2.0形式でSTDIN/STDOUT経由で処理するPHP製の簡易MCPサー�
 
 [MCP Inspector](https://github.com/modelcontextprotocol/inspector)
 
+## OpenWeatherAPIキーの登録
+天気を取得するために、無料で使える OpenWeather のAPI ([Built-in API request by city name](https://openweathermap.org/current))を使用しています。
+
+APIキーはログインして My API Keys で発行してください。
+
+https://home.openweathermap.org/api_keys
+
+発行したキーは、以下のコマンドを叩くか、.envファイルに追加してください。
+(.envファイルはmakeコマンドから試す用です)
+
+```
+export OPENWEATHER_API_KEY=XXXXXX
+```
 
 ## エージェントへの登録
 Cursor や GitHubCopilot への設定例
@@ -94,5 +107,4 @@ echo '{"jsonrpc": "2.0", "id": 4, "method": "tools/call", "params": {"name": "cl
   echo '{"jsonrpc": "2.0", "id": 4, "method": "tools/invoke", "params": {"name": "watch", "arguments":{"timezone": "Asia/Tokyo"}}}' | make run
   # エラーレスポンス例
   # {"jsonrpc":"2.0","id":4,"error":{"code":-32601,"message":"Method not found"}}
-
-```
+  ```
