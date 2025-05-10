@@ -25,6 +25,7 @@ class GetExecutableTool
     /**
      * ツールを実行する
      * @return ToolInterface
+     * @throws \Exception
      */
     public function handle() : ToolInterface
     {
