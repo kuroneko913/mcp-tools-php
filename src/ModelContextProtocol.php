@@ -4,6 +4,11 @@ namespace App;
 
 use App\Tools\ToolInterface;
 
+/**
+ * Model Context Protocol
+ * tools.json を読み込んで、ツールを実行する
+ * @see https://modelcontextprotocol.io/specification/2024-11-05
+ */
 class ModelContextProtocol
 {
     /**
