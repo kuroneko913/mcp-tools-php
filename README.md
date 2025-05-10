@@ -1,4 +1,4 @@
-# MCP STDINサーバ（PHP版）
+# MCP 簡易STDINサーバ（PHP版）
 
 ## 概要
 JSON-RPC 2.0形式でSTDIN/STDOUT経由で処理するPHP製の簡易MCPサーバです。
@@ -49,6 +49,10 @@ Cursor や GitHubCopilot への設定例
   }
 }
 ```
+
+![image](https://github.com/user-attachments/assets/eba44618-8f08-40d3-90b8-2c4744809982)
+![image](https://github.com/user-attachments/assets/bedb13cd-1613-4a7f-a44f-b67a0dcd455c)
+![image](https://github.com/user-attachments/assets/e6570066-7ad5-4e1c-b102-6ac2b293cdc9)
 
 ## コマンド実行例
 
