@@ -23,8 +23,8 @@ while ($line = fgets(STDIN)) {
         ], JSON_UNESCAPED_UNICODE) . "\n";
         continue;
     }
-    $id = $request['id'];
-    $method = $request['method'];
+    $id = $request['id'] ?? null;
+    $method = $request['method'] ?? '';
     $params = $request['params'] ?? [];
     try {
         $result = match($method) {
