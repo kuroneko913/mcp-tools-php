@@ -16,8 +16,12 @@ class Clock implements ToolInterface
         if ($timezone === '') {
             throw new \Exception('timezone is required');
         }
-        $datetime = new \DateTime('now', new \DateTimeZone($timezone));
-        $datetime_str = $datetime->format('Y-m-d H:i:s');
+        try {
+            $datetime = new \DateTime('now', new \DateTimeZone($timezone));
+            $datetime_str = $datetime->format('Y-m-d H:i:s');
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to get current time: ' . $e->getMessage(), -32601);
+        }
         return [
             "content" => [
                 [

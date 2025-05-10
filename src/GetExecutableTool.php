@@ -48,7 +48,7 @@ class GetExecutableTool
         if (!is_string($toolName)) {
             throw new \Exception('Tool name must be a string', -32601);
         }
-        if (!array_column($this->tools['tools'], 'name', 'name')[$toolName]) {
+        if (!(array_column($this->tools['tools'], 'name', 'name')[$toolName] ?? false)) {
             throw new \Exception('Tool not found', -32601);
         }
         return;
