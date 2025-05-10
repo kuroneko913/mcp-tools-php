@@ -1,10 +1,33 @@
 # MCP STDINサーバ（PHP版）
 
 ## 概要
+このサーバは、tools.jsonで定義されたツールをJSON-RPC 2.0形式でSTDIN/STDOUT経由で処理するPHP製MCPサーバです。
+自作することでプロトコルの理解を深めるのが目的です。
+[GitHub(ModelContextProtocol)](https://github.com/modelcontextprotocol)
 
-このサーバは、tools.jsonで定義されたツール（weather, clock）をJSON-RPC 2.0形式でSTDIN/STDOUT経由で処理するPHP製MCPサーバです。
+## エージェントへの登録
+Cursor や GitHubCopilot への設定例
 
-## 実行例
+```json
+{
+  "mcpServers": {
+    "mcp-tools-php": {
+      "command": "env",
+      "args": [
+        "docker",
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "OPENWEATHER_API_KEY",
+        "mcp-tools-php"
+      ]
+    }
+  }
+}
+```
+
+## コマンド実行例
 
 ### 1. initialize
 ```sh
