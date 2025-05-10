@@ -84,8 +84,8 @@ class GetExecutableTool
         if (!($instance instanceof ToolInterface)) {
             throw new \Exception("Tool class must implement ToolInterface: $className", -32601);
         }
-        if (!method_exists($instance, 'handle')) {
-            throw new \Exception("Tool method 'handle' not found in $className", -32601);
+        if (!method_exists($instance, 'invoke')) {
+            throw new \Exception("Tool method 'invoke' not found in $instance", -32601);
         }
         return $instance;
     }

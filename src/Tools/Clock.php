@@ -10,7 +10,7 @@ class Clock implements ToolInterface
     /**
      * @inheritdoc
      */
-    public function handle(array $params) : array
+    public function invoke(array $params) : array
     {
         $timezone = $params['timezone'] ?? '';
         if ($timezone === '') {

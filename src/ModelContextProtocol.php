@@ -94,7 +94,7 @@ class ModelContextProtocol
         $arguments = $params['arguments'] ?? [];
         $tool = (new GetExecutableTool($toolName, $arguments, $this->tools))->handle();
         try {   
-            return $tool->handle($arguments);
+            return $tool->invoke($arguments);
         } catch (\Exception $e) {
             throw new \Exception('Tool execution failed: ' . $e->getMessage(), -32601, $e);
         }

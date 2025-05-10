@@ -9,5 +9,5 @@ interface ToolInterface
      * @param array $params
      * @return array{content: array{type: string, text: string}}
      */
-    public function handle(array $params) : array;
+    public function invoke(array $params) : array;
 }
