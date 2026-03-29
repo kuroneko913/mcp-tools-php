@@ -1,60 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App;
 
 require_once dirname(__DIR__, 1) . '/vendor/autoload.php';
 
+// 1. ツールのメタデータを抽出
 $extractor = new ToolMetadataExtractor();
-$filePaths = glob(__DIR__ . '/Tools/*.php');
+$toolsDir = __DIR__ . '/Tools';
+$filePaths = glob($toolsDir . '/*.php');
 if ($filePaths === false) {
     $filePaths = [];
 }
-$tools = ['tools' => $extractor->extract($filePaths)];
+$toolsSchema = ['tools' => $extractor->extract($filePaths)];
 
-$modelContextProtocol = new ModelContextProtocol($tools);
+// 2. プロトコル層の初期化（ツール生成ロジックは内部でデフォルト生成されます）
+$modelContextProtocol = new ModelContextProtocol($toolsSchema);
 
-// MCP STDINサーバ (JSON-RPC 2.0)
-while ($line = fgets(STDIN)) {
-    $input = trim($line);
-    if ($input === '') {
-        continue;
-    }
-    $request = json_decode($input, true);
-    if (!is_array($request) || !isset($request['jsonrpc']) || !isset($request['method']) || !isset($request['id'])) {
-        echo json_encode([
-            'jsonrpc' => '2.0',
-            'id' => $request['id'] ?? null,
-            'error' => [
-                'code' => -32600,
-                'message' => 'Invalid Request'
-            ]
-        ], JSON_UNESCAPED_UNICODE) . "\n";
-        continue;
-    }
-    $id = $request['id'];
-    $method = $request['method'];
-    $params = $request['params'] ?? [];
-    try {
-        $result = match ($method) {
-            'initialize' => $modelContextProtocol->initialize($params),
-            'tools/list' => $modelContextProtocol->toolsList(),
-            'tools/call' => $modelContextProtocol->execute($params),
-            default => throw new \Exception('Method not found', -32601),
-        };
-
-        echo json_encode([
-            'jsonrpc' => '2.0',
-            'id' => $id,
-            'result' => $result
-        ], JSON_UNESCAPED_UNICODE) . "\n";
-    } catch (\Throwable $e) {
-        echo json_encode([
-            'jsonrpc' => '2.0',
-            'id' => $id,
-            'error' => [
-                'code' => $e->getCode() ?: -32603,
-                'message' => $e->getMessage()
-            ]
-        ], JSON_UNESCAPED_UNICODE) . "\n";
-    }
-}
+// 3. MCP サーバーの起動
+$mcpServer = new McpServer($modelContextProtocol);
+$mcpServer->run(STDIN, STDOUT);
