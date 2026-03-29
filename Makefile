@@ -5,7 +5,7 @@ IMAGE_NAME = mcp-tools-php
 build:
 	docker build -f docker/Dockerfile -t $(IMAGE_NAME) .
 
-run:
+run: build
 	@if [ -f .env ]; then \
 		echo "[INFO] .envを検出: --env-file .env で起動"; \
 		docker run --env-file .env -i $(IMAGE_NAME); \

@@ -34,9 +34,8 @@ class McpServer
             $request = json_decode($line, true);
             if (
                 !is_array($request)
-                || !isset($request['jsonrpc'])
+                || ($request['jsonrpc'] ?? null) !== '2.0'
                 || !isset($request['method'])
-                || !isset($request['id'])
             ) {
                 $errorResponse = [
                     'jsonrpc' => '2.0',
@@ -47,6 +46,12 @@ class McpServer
                     ],
                 ];
                 fwrite($output, json_encode($errorResponse, JSON_UNESCAPED_UNICODE) . "\n");
+                continue;
+            }
+
+            // 'id' がない場合は通知 (Notification) とみなして処理を継続 (プロトコル仕様)
+            // または無視して次へ（通知にはレスポンスを返さない）
+            if (!array_key_exists('id', $request)) {
                 continue;
             }
 

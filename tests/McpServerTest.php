@@ -145,4 +145,73 @@ class McpServerTest extends TestCase
         fclose($input);
         fclose($output);
     }
+
+    /**
+     * id が null のリクエストを正しく処理できることを確認
+     */
+    public function testRunHandlesIdNull(): void
+    {
+        $inputData = json_encode([
+            'jsonrpc' => '2.0',
+            'id' => null,
+            'method' => 'tools/list'
+        ]) . "\n";
+
+        $this->protocol->expects($this->once())
+            ->method('toolsList')
+            ->willReturn(['tools' => []]);
+
+        $input = fopen('php://memory', 'r+');
+        $output = fopen('php://memory', 'r+');
+        if (!is_resource($input) || !is_resource($output)) {
+            $this->fail('Failed to open memory streams');
+        }
+
+        fwrite($input, (string)$inputData);
+        rewind($input);
+
+        $server = new McpServer($this->protocol);
+        $server->run($input, $output);
+
+        rewind($output);
+        $response = (string)stream_get_contents($output);
+        $responseData = json_decode($response, true);
+
+        $this->assertEquals('2.0', $responseData['jsonrpc']);
+        $this->assertNull($responseData['id']);
+        $this->assertArrayHasKey('result', $responseData);
+
+        fclose($input);
+        fclose($output);
+    }
+
+    /**
+     * 通知 (id なし) のリクエスト時にレスポンスを返さないことを確認
+     */
+    public function testRunHandlesNotificationNoResponse(): void
+    {
+        $inputData = json_encode([
+            'jsonrpc' => '2.0',
+            'method' => 'notifications/initialized'
+        ]) . "\n";
+
+        $input = fopen('php://memory', 'r+');
+        $output = fopen('php://memory', 'r+');
+        if (!is_resource($input) || !is_resource($output)) {
+            $this->fail('Failed to open memory streams');
+        }
+
+        fwrite($input, (string)$inputData);
+        rewind($input);
+
+        $server = new McpServer($this->protocol);
+        $server->run($input, $output);
+
+        rewind($output);
+        $response = (string)stream_get_contents($output);
+        $this->assertEmpty($response, 'Notification should not produce a response');
+
+        fclose($input);
+        fclose($output);
+    }
 }
