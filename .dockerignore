@@ -1,0 +1,12 @@
+vendor/
+.git/
+.github/
+.phpunit.result.cache
+tests/
+phpunit.xml
+phpstan.neon
+phpcs.xml
+fix_tests.php
+docker/
+Makefile
+README.md
