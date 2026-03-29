@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<ruleset name="MCP-Tools-PHP">
+    <description>PSR-12 coding standard.</description>
+
+    <!-- Scan these directories -->
+    <file>src/</file>
+    <file>tests/</file>
+
+    <!-- Exclude some standard files/folders -->
+    <exclude-pattern>vendor/</exclude-pattern>
+
+    <!-- Show progress -->
+    <arg value="p"/>
+    <!-- Show colors -->
+    <arg name="colors"/>
+
+    <!-- Use PSR-12 coding standard -->
+    <rule ref="PSR12"/>
+</ruleset>

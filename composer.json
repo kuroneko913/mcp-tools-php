@@ -14,5 +14,10 @@
             "name": "kuroneko913",
             "email": "myblackcat7112+github@gmail.com"
         }
-    ]
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "^13.0",
+        "squizlabs/php_codesniffer": "^4.0",
+        "phpstan/phpstan": "^2.1"
+    }
 }
