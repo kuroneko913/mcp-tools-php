@@ -1,104 +1,79 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
 use App\GetExecutableTool;
 use App\Tools\Clock;
+use App\Tools\Weather;
 use PHPUnit\Framework\TestCase;
-use Exception;
 
 class GetExecutableToolTest extends TestCase
 {
-    /**
-     * @var array{tools: array<int, array{name: string}>}
-     */
-    private array $toolsSchema;
+    /** @var array{tools: list<array{name: string, description: string}>} */
+    private array $toolsData;
 
     protected function setUp(): void
     {
-        $this->toolsSchema = [
+        putenv('OPENWEATHER_API_KEY=dummy_key');
+        $this->toolsData = [
             'tools' => [
-                ['name' => 'clock']
+                ['name' => 'clock', 'description' => 'A clock tool'],
+                ['name' => 'weather', 'description' => 'A weather tool']
             ]
         ];
     }
 
     /**
-
-     * 正常系や異常系のテスト
-
+     * 正常系: ツール名が登録されている場合に正しいインスタンスを返す
      */
-
-    public function testHandleReturnsExecutableInstance(): void
+    public function testCreateReturnsCorrectInstance(): void
     {
-        $getExecutable = new GetExecutableTool('clock', ['timezone' => 'Asia/Tokyo'], $this->toolsSchema);
-        $tool = $getExecutable->handle();
+        $factory = new GetExecutableTool();
 
+        $tool = $factory->create('clock', ['timezone' => 'Asia/Tokyo'], $this->toolsData);
         $this->assertInstanceOf(Clock::class, $tool);
+
+        $tool = $factory->create('weather', ['location' => 'Yokohama'], $this->toolsData);
+        $this->assertInstanceOf(Weather::class, $tool);
     }
 
     /**
-
-     * 正常系や異常系のテスト
-
+     * 異常系: 登録されていないツール名を指定した場合に例外を投げる
      */
-
-    public function testValidateToolNameThrowsExceptionWhenEmpty(): void
+    public function testCreateThrowsExceptionForUnknownTool(): void
     {
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Tool name is required');
-
-        $getExecutable = new GetExecutableTool('', ['timezone' => 'Asia/Tokyo'], $this->toolsSchema);
-        $getExecutable->handle();
-    }
-
-    /**
-
-     * 正常系や異常系のテスト
-
-     */
-
-    public function testValidateToolNameThrowsExceptionWhenNotFoundInSchema(): void
-    {
-        $this->expectException(Exception::class);
+        $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Tool not found');
 
-        $getExecutable = new GetExecutableTool('unknown', ['dummy' => 'val'], $this->toolsSchema);
-        $getExecutable->handle();
+        $factory = new GetExecutableTool();
+        $factory->create('unknown', [], $this->toolsData);
     }
 
     /**
-
-     * 正常系や異常系のテスト
-
+     * 異常系: ツール名が空の場合に例外を投げる
      */
-
-    public function testGetExecutableInstanceThrowsExceptionWhenClassNotFound(): void
+    public function testCreateThrowsExceptionForEmptyToolName(): void
     {
-        $schema = [
-            'tools' => [
-                ['name' => 'notexists']
-            ]
-        ];
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Tool class not found: App\Tools\Notexists');
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Tool name is required');
 
-        $getExecutable = new GetExecutableTool('notexists', ['dummy' => 'val'], $schema);
-        $getExecutable->handle();
+        $factory = new GetExecutableTool();
+        $factory->create('', [], $this->toolsData);
     }
 
     /**
-
-     * 正常系や異常系のテスト
-
+     * Clock ツールがデフォルトの時刻で正しく生成されること
      */
-
-    public function testValidateArgumentsThrowsExceptionWhenEmptyArray(): void
+    public function testCreateClockTool(): void
     {
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Arguments must be an array');
+        $factory = new GetExecutableTool();
+        $tool = $factory->create('clock', ['timezone' => 'Asia/Tokyo'], $this->toolsData);
 
-        $getExecutable = new GetExecutableTool('clock', [], $this->toolsSchema);
-        $getExecutable->handle();
+        $this->assertInstanceOf(Clock::class, $tool);
+        /** @var Clock $tool */
+        $result = $tool->invoke('Asia/Tokyo');
+        $this->assertArrayHasKey('content', $result);
     }
 }

@@ -1,92 +1,67 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App;
 
 use App\Tools\ToolInterface;
 
 /**
- * 実行可能なツールを取得する
+ * 実行可能なツールインスタンスを生成するクラス
  */
 class GetExecutableTool
 {
     /**
-     * コンストラクタ
+     * ツールインスタンスを生成して返す
      *
-     * @param string $toolName 対象のツール名
+     * @param string $toolName ツール名
      * @param array<string, mixed> $arguments ツールの引数
-     * @param array{tools: array<int, array{name: string}>} $tools ツールのリスト
-     */
-    public function __construct(
-        private string $toolName,
-        private array $arguments,
-        private array $tools,
-    ) {
-    }
-
-    /**
-     * ツールを実行する
+     * @param array{tools: array<int, array{name: string}>} $toolsSchema ツールのリスト
      * @return ToolInterface
      * @throws \Exception
      */
-    public function handle(): ToolInterface
+    public function create(string $toolName, array $arguments, array $toolsSchema): ToolInterface
     {
-        $this->validateToolName($this->toolName);
-        $this->validateArguments($this->arguments);
-        return $this->getExecutableInstance($this->toolName);
+        $this->validateToolName($toolName, $toolsSchema);
+        return $this->getExecutableInstance($toolName);
     }
 
     /**
-     * ツール名を検証する
+     * ツール名を公開リストと照合して検証する
      * @param string $toolName
+     * @param array{tools: array<int, array{name: string}>} $toolsSchema
      * @return void
      * @throws \Exception
      */
-    private function validateToolName(string $toolName): void
+    private function validateToolName(string $toolName, array $toolsSchema): void
     {
         if ($toolName === '') {
             throw new \Exception('Tool name is required', -32601);
         }
 
-        if (!(array_column($this->tools['tools'], 'name', 'name')[$toolName] ?? false)) {
+        if (!(array_column($toolsSchema['tools'], 'name', 'name')[$toolName] ?? false)) {
             throw new \Exception('Tool not found', -32601);
         }
-        return;
     }
 
     /**
-     * 引数のバリデーションを行う
-     *
-     * @param array<string, mixed> $arguments
-     * @return void
-     */
-    private function validateArguments(array $arguments): void
-    {
-        if ($arguments === []) {
-            throw new \Exception('Arguments must be an array', -32601);
-        }
-        return;
-    }
-
-    /**
-     * 実行可能なツールを取得する
+     * ツールクラスをインスタンス化する
      * @param string $toolName
      * @return ToolInterface
      * @throws \Exception
      */
     private function getExecutableInstance(string $toolName): ToolInterface
     {
+        /** @var class-string $className */
         $className = "App\\Tools\\" . ucfirst($toolName);
+
         if (!class_exists($className)) {
             throw new \Exception("Tool class not found: $className", -32601);
         }
+
+        /** @var ToolInterface $instance */
         $instance = new $className();
-        if (!($instance instanceof ToolInterface)) {
-            throw new \Exception("Tool class must implement ToolInterface: $className", -32601);
-        }
-        // @phpstan-ignore-next-line
-        if (!method_exists($instance, 'invoke')) {
-            throw new \Exception("Tool method 'invoke' not found in " . get_class($instance), -32601);
-        }
+
         return $instance;
     }
 }

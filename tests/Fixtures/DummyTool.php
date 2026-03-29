@@ -1,13 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Fixtures;
 
 use App\Tools\ToolInterface;
 
 /**
- * テスト用のダミーツール
- *
- * このクラスはリフレクションのテストに使用します。
+ * テスト用のダミーツールクラス
  */
 class DummyTool implements ToolInterface
 {

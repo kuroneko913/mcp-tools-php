@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit bootstrap="vendor/autoload.php" colors="true">
+<phpunit bootstrap="vendor/autoload.php"
+         colors="true"
+         displayDetailsOnTestsThatTriggerNotices="true"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true">
     <testsuites>
         <testsuite name="MCP Tools Test Suite">
             <directory>tests</directory>

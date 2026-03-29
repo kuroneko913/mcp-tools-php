@@ -1,78 +1,84 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App;
 
 /**
- * Model Context Protocol
- * tools.json を読み込んで、ツールを実行する
- * @see https://modelcontextprotocol.io/specification/2024-11-05
+ * Model Context Protocol (MCP) のコアロジックを管理するクラス
  */
 class ModelContextProtocol
 {
     /**
-     * @var array{tools: array<int, array{name: string, description: string, inputSchema?: mixed}>}
+     * @var GetExecutableTool
      */
-    private array $tools;
+    private GetExecutableTool $toolFactory;
 
     /**
-     * @param array{tools: array<int, array{name: string, description: string, inputSchema?: mixed}>} $tools
+     * @param array{tools: array<int, array{name: string, description: string, inputSchema?: mixed}>} $toolsSchema
+     *        ツール定義のスキーマ
+     * @param GetExecutableTool|null $toolFactory ツール生成用ロジック（オプション）
      */
-    public function __construct(array $tools)
-    {
-        $this->tools = $tools;
+    public function __construct(
+        private array $toolsSchema,
+        ?GetExecutableTool $toolFactory = null
+    ) {
+        $this->toolFactory = $toolFactory ?? new GetExecutableTool();
     }
 
     /**
-     * 初期化レスポンスを返す
-     *
+     * initialize メソッドのレスポンスを生成する
      * @param array<string, mixed> $params
-     * @return array{protocolVersion: string, serverInfo: array{name: string, version: string}}
+     * @return array<string, mixed>
      */
     public function initialize(array $params): array
     {
         return [
-            'protocolVersion' => $params['protocolVersion'],
-            'capabilities' => [
-                'tools' => [
-                    'listChanged' => false
+            "protocolVersion" => $params['protocolVersion'] ?? "2024-11-05",
+            "capabilities" => [
+                "tools" => [
+                    "listChanged" => false
                 ]
             ],
-            'serverInfo' => [
-                'name' => 'mcp-tools-php',
-                'version' => '0.0.1'
+            "serverInfo" => [
+                "name" => "mcp-tools-php",
+                "version" => "0.0.1"
             ]
         ];
     }
 
     /**
-     * 利用可能なツールのリストを返す
-     *
+     * 登録されているツール一覧を取得する
      * @return array{tools: array<int, array{name: string, description: string, inputSchema?: mixed}>}
      */
     public function toolsList(): array
     {
-        return [
-            'tools' => $this->tools['tools']
-        ];
+        return $this->toolsSchema;
     }
 
     /**
-     * ツールを実行する
+     * 指定されたツールを実行する
      *
-     * @param array{name: string, arguments: array<string, mixed>} $params
-     * @return array{content: list<array{type: string, text: string}>}
+     * @param array<string, mixed> $params JSON-RPC パラメータ
+     * @return array<string, mixed>
+     * @throws \Exception
      */
     public function execute(array $params): array
     {
-        $toolName = $params['name'];
-        $arguments = $params['arguments'];
-        $tool = (new GetExecutableTool($toolName, $arguments, $this->tools))->handle();
+        $toolName = $params['name'] ?? '';
+        $arguments = $params['arguments'] ?? [];
+
+        // ファクトリを通じてツールインスタンスを生成
+        $tool = $this->toolFactory->create($toolName, $arguments, $this->toolsSchema);
+
+        // リフレクションを使用して名前付き引数として invoke を呼び出す
         try {
+            $reflectionMethod = new \ReflectionMethod($tool, 'invoke');
             /** @var array{content: list<array{type: string, text: string}>} $result */
-            $result = $tool->invoke(...$arguments);
+            $result = $reflectionMethod->invokeArgs($tool, $arguments);
             return $result;
         } catch (\Throwable $e) {
-            throw new \Exception('Tool execution failed: ' . $e->getMessage(), -32601, $e);
+            throw new \Exception('Tool execution failed: ' . $e->getMessage(), -32601);
         }
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
 use App\ToolMetadataExtractor;
@@ -28,9 +30,7 @@ class ToolMetadataExtractorTest extends TestCase
 
         // 名前がクラス名の小文字であること
         $this->assertEquals('dummytool', $tool['name']);
-
-        // 説明がクラスのPHPDocから取得できていること
-        $this->assertEquals('テスト用のダミーツール', $tool['description']);
+        $this->assertEquals('テスト用のダミーツールクラス', $tool['description']);
 
         // inputSchemaが正しく構築されていること
         $inputSchema = $tool['inputSchema'];
