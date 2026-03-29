@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Tools;
 
 use GuzzleHttp\Client;
@@ -31,12 +33,17 @@ class Weather implements ToolInterface
     public function __construct(?string $apiKey = null, ?Client $client = null)
     {
         $envKey = getenv('OPENWEATHER_API_KEY');
-        $this->apiKey = $apiKey ?? (is_string($envKey) ? $envKey : '');
-        if (!$this->apiKey) {
+        // 環境変数が設定されていない（false）か空文字の場合は引数の $apiKey を使用
+        $resolvedKey = ($envKey !== false && $envKey !== '') ? $envKey : ($apiKey ?? '');
+
+        if ($resolvedKey === '') {
             throw new \Exception('OPENWEATHER_API_KEY is not set');
         }
+
+        $this->apiKey = $resolvedKey;
         $this->client = $client ?? new Client();
     }
+
 
     /**
      * @param string $location
@@ -67,23 +74,19 @@ class Weather implements ToolInterface
                     ],
                 ]
             );
-            $data = json_decode($response->getBody(), true);
+            $body = (string) $response->getBody();
+            $data = json_decode($body, true);
             $weather = $data['weather'][0]['description'] ?? '不明';
             $temperature = $data['main']['temp'] ?? '不明';
             $humidity = $data['main']['humidity'] ?? '不明';
         } catch (\Exception $e) {
-            throw new \Exception('Failed to get weather data');
+            throw new \Exception('Weather lookup failed: ' . $e->getMessage(), -32601);
         }
         return [
             "content" => [
                 [
                     "type" => 'text',
-                    "text" => (string) json_encode([
-                        'location' => $location,
-                        'weather' => $weather,
-                        'temperature' => $temperature,
-                        'humidity' => $humidity,
-                    ])
+                    "text" => "現在地: {$location}\n天気: {$weather}\n気温: {$temperature}℃\n湿度: {$humidity}%"
                 ]
             ]
         ];
