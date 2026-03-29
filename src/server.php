@@ -2,15 +2,23 @@
 
 namespace App;
 
-require_once dirname(__DIR__,1) . '/vendor/autoload.php';
+require_once dirname(__DIR__, 1) . '/vendor/autoload.php';
 
-$tools = json_decode(file_get_contents(dirname(__DIR__,1) . '/tools.json'), true);
+$extractor = new ToolMetadataExtractor();
+$filePaths = glob(__DIR__ . '/Tools/*.php');
+if ($filePaths === false) {
+    $filePaths = [];
+}
+$tools = ['tools' => $extractor->extract($filePaths)];
+
 $modelContextProtocol = new ModelContextProtocol($tools);
 
 // MCP STDINサーバ (JSON-RPC 2.0)
 while ($line = fgets(STDIN)) {
     $input = trim($line);
-    if ($input === '') continue;
+    if ($input === '') {
+        continue;
+    }
     $request = json_decode($input, true);
     if (!is_array($request) || !isset($request['jsonrpc']) || !isset($request['method']) || !isset($request['id'])) {
         echo json_encode([
@@ -23,11 +31,11 @@ while ($line = fgets(STDIN)) {
         ], JSON_UNESCAPED_UNICODE) . "\n";
         continue;
     }
-    $id = $request['id'] ?? null;
-    $method = $request['method'] ?? '';
+    $id = $request['id'];
+    $method = $request['method'];
     $params = $request['params'] ?? [];
     try {
-        $result = match($method) {
+        $result = match ($method) {
             'initialize' => $modelContextProtocol->initialize($params),
             'tools/list' => $modelContextProtocol->toolsList(),
             'tools/call' => $modelContextProtocol->execute($params),
@@ -39,7 +47,7 @@ while ($line = fgets(STDIN)) {
             'id' => $id,
             'result' => $result
         ], JSON_UNESCAPED_UNICODE) . "\n";
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
         echo json_encode([
             'jsonrpc' => '2.0',
             'id' => $id,
@@ -49,4 +57,4 @@ while ($line = fgets(STDIN)) {
             ]
         ], JSON_UNESCAPED_UNICODE) . "\n";
     }
-} 
+}

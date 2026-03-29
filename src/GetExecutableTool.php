@@ -11,9 +11,10 @@ class GetExecutableTool
 {
     /**
      * コンストラクタ
-     * @param string $toolName ツール名
-     * @param array $arguments ツールの引数
-     * @param array $tools ツールのリスト
+     *
+     * @param string $toolName 対象のツール名
+     * @param array<string, mixed> $arguments ツールの引数
+     * @param array{tools: array<int, array{name: string}>} $tools ツールのリスト
      */
     public function __construct(
         private string $toolName,
@@ -27,7 +28,7 @@ class GetExecutableTool
      * @return ToolInterface
      * @throws \Exception
      */
-    public function handle() : ToolInterface
+    public function handle(): ToolInterface
     {
         $this->validateToolName($this->toolName);
         $this->validateArguments($this->arguments);
@@ -40,14 +41,12 @@ class GetExecutableTool
      * @return void
      * @throws \Exception
      */
-    private function validateToolName(string $toolName) : void
+    private function validateToolName(string $toolName): void
     {
         if ($toolName === '') {
             throw new \Exception('Tool name is required', -32601);
         }
-        if (!is_string($toolName)) {
-            throw new \Exception('Tool name must be a string', -32601);
-        }
+
         if (!(array_column($this->tools['tools'], 'name', 'name')[$toolName] ?? false)) {
             throw new \Exception('Tool not found', -32601);
         }
@@ -55,12 +54,12 @@ class GetExecutableTool
     }
 
     /**
-     * 引数を検証する
-     * @param array $arguments
+     * 引数のバリデーションを行う
+     *
+     * @param array<string, mixed> $arguments
      * @return void
-     * @throws \Exception
      */
-    private function validateArguments(array $arguments) : void
+    private function validateArguments(array $arguments): void
     {
         if ($arguments === []) {
             throw new \Exception('Arguments must be an array', -32601);
@@ -74,7 +73,7 @@ class GetExecutableTool
      * @return ToolInterface
      * @throws \Exception
      */
-    private function getExecutableInstance(string $toolName) : ToolInterface
+    private function getExecutableInstance(string $toolName): ToolInterface
     {
         $className = "App\\Tools\\" . ucfirst($toolName);
         if (!class_exists($className)) {
@@ -84,8 +83,9 @@ class GetExecutableTool
         if (!($instance instanceof ToolInterface)) {
             throw new \Exception("Tool class must implement ToolInterface: $className", -32601);
         }
+        // @phpstan-ignore-next-line
         if (!method_exists($instance, 'invoke')) {
-            throw new \Exception("Tool method 'invoke' not found in $instance", -32601);
+            throw new \Exception("Tool method 'invoke' not found in " . get_class($instance), -32601);
         }
         return $instance;
     }

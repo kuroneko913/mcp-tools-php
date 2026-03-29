@@ -13,16 +13,16 @@ class Weather implements ToolInterface
      * @var string
      */
     private const API_URL = 'https://api.openweathermap.org/data/2.5/weather';
-    
+
     /**
      * @var Client
      */
-    private ?Client $client;
+    private Client $client;
 
     /**
      * @var string
      */
-    private ?string $apiKey;
+    private string $apiKey;
 
     /**
      * @param string|null $apiKey
@@ -30,7 +30,8 @@ class Weather implements ToolInterface
      */
     public function __construct(?string $apiKey = null, ?Client $client = null)
     {
-        $this->apiKey = $apiKey ?? getenv('OPENWEATHER_API_KEY');
+        $envKey = getenv('OPENWEATHER_API_KEY');
+        $this->apiKey = $apiKey ?? (is_string($envKey) ? $envKey : '');
         if (!$this->apiKey) {
             throw new \Exception('OPENWEATHER_API_KEY is not set');
         }
@@ -38,18 +39,19 @@ class Weather implements ToolInterface
     }
 
     /**
-     * @inheritdoc
+     * @param string $location
+     * @return array{content: list<array{type: string, text: string}>}
+     * @throws \Exception
      */
-    public function invoke(array $params) : array
+    public function invoke(string $location): array
     {
-        $location = $params['location'] ?? '';
         if ($location === '') {
             throw new \Exception('location is required');
         }
         $city = $this->getCity($location);
         try {
             $response = $this->client->request(
-                'GET', 
+                'GET',
                 self::API_URL,
                 [
                     'query' => [
@@ -74,9 +76,9 @@ class Weather implements ToolInterface
         }
         return [
             "content" => [
-                [   
+                [
                     "type" => 'text',
-                    "text" => json_encode([
+                    "text" => (string) json_encode([
                         'location' => $location,
                         'weather' => $weather,
                         'temperature' => $temperature,
@@ -84,14 +86,14 @@ class Weather implements ToolInterface
                     ])
                 ]
             ]
-        ];  
+        ];
     }
 
     /**
      * @param string $location 地名
      * @return string 地名のAPI用の文字列
      */
-    private function getCity(string $location) : string
+    private function getCity(string $location): string
     {
         $cityMapping = [
             '横浜' => 'Yokohama, JP',

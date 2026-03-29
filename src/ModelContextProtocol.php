@@ -10,22 +10,12 @@ namespace App;
 class ModelContextProtocol
 {
     /**
-     * @var array{
-     *      tools: array{
-     *          name: string,
-     *          description: string
-     *      }[]
-     * }
+     * @var array{tools: array<int, array{name: string, description: string, inputSchema?: mixed}>}
      */
     private array $tools;
 
     /**
-     * @param array{
-     *      tools: array{
-     *          name: string,
-     *          description: string
-     *      }[]
-     * } $tools
+     * @param array{tools: array<int, array{name: string, description: string, inputSchema?: mixed}>} $tools
      */
     public function __construct(array $tools)
     {
@@ -33,22 +23,12 @@ class ModelContextProtocol
     }
 
     /**
-     * 初期化する
-     * @param array $params
-     * @return array{
-     *      protocolVersion: string,
-     *      capabilities: array{
-     *          tools: array{
-     *              listChanged: boolean
-     *          }
-     *      },
-     *      serverInfo: array{
-     *          name: string,
-     *          version: string
-     *      }
-     * }
+     * 初期化レスポンスを返す
+     *
+     * @param array<string, mixed> $params
+     * @return array{protocolVersion: string, serverInfo: array{name: string, version: string}}
      */
-    public function initialize(array $params) : array
+    public function initialize(array $params): array
     {
         return [
             'protocolVersion' => $params['protocolVersion'],
@@ -65,15 +45,11 @@ class ModelContextProtocol
     }
 
     /**
-     * ツールのリストを取得する
-     * @return array{
-     *      tools: array{
-     *          name: string,
-     *          description: string
-     *      }[]
-     * }
+     * 利用可能なツールのリストを返す
+     *
+     * @return array{tools: array<int, array{name: string, description: string, inputSchema?: mixed}>}
      */
-    public function toolsList() : array
+    public function toolsList(): array
     {
         return [
             'tools' => $this->tools['tools']
@@ -82,20 +58,20 @@ class ModelContextProtocol
 
     /**
      * ツールを実行する
-     * @param array{
-     *      name: string,
-     *      arguments: array
-     * } $params
-     * @return array{content: array{type: string, text: string}}
+     *
+     * @param array{name: string, arguments: array<string, mixed>} $params
+     * @return array{content: list<array{type: string, text: string}>}
      */
-    public function execute(array $params) : array
+    public function execute(array $params): array
     {
-        $toolName = $params['name'] ?? '';
-        $arguments = $params['arguments'] ?? [];
+        $toolName = $params['name'];
+        $arguments = $params['arguments'];
         $tool = (new GetExecutableTool($toolName, $arguments, $this->tools))->handle();
-        try {   
-            return $tool->invoke($arguments);
-        } catch (\Exception $e) {
+        try {
+            /** @var array{content: list<array{type: string, text: string}>} $result */
+            $result = $tool->invoke(...$arguments);
+            return $result;
+        } catch (\Throwable $e) {
             throw new \Exception('Tool execution failed: ' . $e->getMessage(), -32601, $e);
         }
     }

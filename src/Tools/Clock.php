@@ -8,11 +8,12 @@ namespace App\Tools;
 class Clock implements ToolInterface
 {
     /**
-     * @inheritdoc
+     * @param string $timezone
+     * @return array{content: list<array{type: string, text: string}>}
+     * @throws \Exception
      */
-    public function invoke(array $params) : array
+    public function invoke(string $timezone): array
     {
-        $timezone = $params['timezone'] ?? '';
         if ($timezone === '') {
             throw new \Exception('timezone is required');
         }
