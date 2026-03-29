@@ -60,19 +60,7 @@ class Weather implements ToolInterface
             $response = $this->client->request(
                 'GET',
                 self::API_URL,
-                [
-                    'query' => [
-                        'q' => $city,
-                        'appid' => $this->apiKey,
-                        'units' => 'metric',
-                        'lang' => 'ja',
-                    ],
-                    'http_errors' => true,
-                    'timeout' => 2000,
-                    'headers' => [
-                        'Accept' => 'application/json',
-                    ],
-                ]
+                $this->buildRequestOptions($city)
             );
             $body = (string) $response->getBody();
             $data = json_decode($body, true);
@@ -113,5 +101,28 @@ class Weather implements ToolInterface
             '那覇' => 'Naha, JP',
         ];
         return $cityMapping[$location] ?? $location;
+    }
+
+    /**
+     * HTTP リクエストに渡すためのオプションを構築する
+     *
+     * @param string $city 都市（クエリパラメータ q 用）
+     * @return array<string, mixed>
+     */
+    private function buildRequestOptions(string $city): array
+    {
+        return [
+            'query' => [
+                'q' => $city,
+                'appid' => $this->apiKey,
+                'units' => 'metric',
+                'lang' => 'ja',
+            ],
+            'http_errors' => true,
+            'timeout' => 2000,
+            'headers' => [
+                'Accept' => 'application/json',
+            ],
+        ];
     }
 }
